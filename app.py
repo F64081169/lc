@@ -65,6 +65,40 @@ percent = done_count / total_count if total_count > 0 else 0
 st.progress(percent)
 st.markdown(f"**目前類別進度：{done_count} / {total_count} 題 ({percent*100:.1f}%)**")
 
+# 讀取並建立 notes/ 下對應的 .md 檔案
+notes_dir = "notes"
+os.makedirs(notes_dir, exist_ok=True)
+note_path = os.path.join(notes_dir, selected_display + ".md")
+
+# 若筆記檔不存在就自動建立
+if not os.path.exists(note_path):
+    with open(note_path, "w", encoding="utf-8") as f:
+        f.write(f"# {selected_display} 類別筆記\n\n<!-- 在此撰寫筆記內容 -->")
+
+# 載入筆記內容
+with open(note_path, "r", encoding="utf-8") as f:
+    current_note = f.read()
+
+# 顯示編輯器讓使用者可以修改筆記
+st.markdown("---")
+st.subheader("📘 類別筆記編輯器")
+edited_note = st.text_area("✍️ 編輯筆記", value=current_note, height=300, label_visibility="collapsed")
+
+# 即時預覽 Markdown 筆記
+with st.expander("📄 預覽筆記（點擊展開）", expanded=True):
+    st.markdown("---")
+    st.markdown("#### 📌 預覽結果")
+    st.markdown(edited_note, unsafe_allow_html=True)
+
+# 儲存按鈕
+if st.button("💾 儲存筆記"):
+    with open(note_path, "w", encoding="utf-8") as f:
+        f.write(edited_note)
+    st.success("✅ 筆記已儲存！")
+    st.rerun()
+
+
+
 # 顯示題目與互動 checkbox
 for idx, row in df.iterrows():
     key = f"{category}_{idx}"
