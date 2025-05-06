@@ -84,18 +84,19 @@ st.markdown("---")
 st.subheader("📘 類別筆記編輯器")
 edited_note = st.text_area("✍️ 編輯筆記", value=current_note, height=300, label_visibility="collapsed")
 
-# 即時預覽 Markdown 筆記
-with st.expander("📄 預覽筆記（點擊展開）", expanded=True):
-    st.markdown("---")
-    st.markdown("#### 📌 預覽結果")
-    st.markdown(edited_note, unsafe_allow_html=True)
-
 # 儲存按鈕
 if st.button("💾 儲存筆記"):
     with open(note_path, "w", encoding="utf-8") as f:
         f.write(edited_note)
     st.success("✅ 筆記已儲存！")
     st.rerun()
+# 即時預覽 Markdown 筆記
+with st.expander("📄 預覽筆記（點擊展開）", expanded=True):
+    st.markdown("---")
+    st.markdown("#### 📌 預覽結果")
+    st.markdown(edited_note, unsafe_allow_html=True)
+
+
 
 
 
