@@ -6,4 +6,4 @@
 `streamlit run app.py`
 
 - Local DB
-Use `progress.json` and /notes
+Use `progress.json` and `/notes`
