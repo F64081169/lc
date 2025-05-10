@@ -11,7 +11,8 @@ supabase: Client = create_client(url, key)
 
 # ===== 登入或註冊區塊 =====
 st.sidebar.title("🔐 使用者登入/註冊")
-auth_action = st.sidebar.radio("請選擇：", ["登入", "註冊"])
+st.sidebar.info("👉 請選擇下方的『登入』或『註冊』，輸入 Email 與密碼後點擊按鈕", icon="💡")
+auth_action = st.sidebar.radio("📌 請選擇操作：", ["登入", "註冊"])
 email = st.sidebar.text_input("Email")
 password = st.sidebar.text_input("密碼", type="password")
 logout = st.sidebar.button("🚪 登出")
@@ -19,7 +20,7 @@ logout = st.sidebar.button("🚪 登出")
 if logout:
     if "user" in st.session_state:
         del st.session_state["user"]
-    st.experimental_rerun()
+    st.rerun()
 
 user = st.session_state.get("user", None)
 
@@ -27,9 +28,9 @@ if auth_action == "註冊":
     if st.sidebar.button("註冊"):
         result = supabase.auth.sign_up({"email": email, "password": password})
         if result.user:
-            st.sidebar.success("✅ 註冊成功！請登入。")
+            st.sidebar.success("✅ 註冊成功！請前往 Email 認證並登入。")
         else:
-            st.sidebar.error("❌ 註冊失敗或是帳號已存在，請至email認證：{}".format(result))
+            st.sidebar.error("❌ 註冊失敗或帳號已存在：{}".format(result))
 elif auth_action == "登入":
     if st.sidebar.button("登入"):
         try:
@@ -37,11 +38,14 @@ elif auth_action == "登入":
             st.session_state["user"] = res.user
             user = res.user
         except Exception as e:
-            st.sidebar.error("❌ 登入失敗或是帳號未於email認證：{}".format(e))
+            st.sidebar.error("❌ 登入失敗或帳號未認證：{}".format(e))
 
 # 若尚未登入則中止 App
 if not user:
     st.stop()
+
+# ===== 顯示登入者 =====
+st.markdown(f"<div style='text-align:right; font-size:0.9em;'>👤 登入帳號：{user.email}</div>", unsafe_allow_html=True)
 
 # ===== Supabase 讀寫邏輯 =====
 def get_note(category):
