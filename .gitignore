@@ -1,2 +1,2 @@
 # prevent from overwriting DB
-
+*.json
