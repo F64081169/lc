@@ -2,31 +2,65 @@ import streamlit as st
 import pandas as pd
 import os
 import re
-from supabase import create_client
+from supabase import create_client, Client
 
 # ===== Supabase 初始化 =====
 url = st.secrets["supabase_url"]
 key = st.secrets["supabase_key"]
-supabase = create_client(url, key)
+supabase: Client = create_client(url, key)
+
+# ===== 登入或註冊區塊 =====
+st.sidebar.title("🔐 使用者登入/註冊")
+auth_action = st.sidebar.radio("請選擇：", ["登入", "註冊"])
+email = st.sidebar.text_input("Email")
+password = st.sidebar.text_input("密碼", type="password")
+logout = st.sidebar.button("🚪 登出")
+
+if logout:
+    if "user" in st.session_state:
+        del st.session_state["user"]
+    st.experimental_rerun()
+
+user = st.session_state.get("user", None)
+
+if auth_action == "註冊":
+    if st.sidebar.button("註冊"):
+        result = supabase.auth.sign_up({"email": email, "password": password})
+        if result.user:
+            st.sidebar.success("✅ 註冊成功！請登入。")
+        else:
+            st.sidebar.error("❌ 註冊失敗或是帳號已存在，請至email認證：{}".format(result))
+elif auth_action == "登入":
+    if st.sidebar.button("登入"):
+        try:
+            res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+            st.session_state["user"] = res.user
+            user = res.user
+        except Exception as e:
+            st.sidebar.error("❌ 登入失敗或是帳號未於email認證：{}".format(e))
+
+# 若尚未登入則中止 App
+if not user:
+    st.stop()
 
 # ===== Supabase 讀寫邏輯 =====
 def get_note(category):
-    res = supabase.table("notes").select("*").eq("category", category).execute()
+    res = supabase.table("notes").select("*").eq("category", category).eq("user_id", user.id).execute()
     if res.data:
         return res.data[0]["content"]
     else:
         return ""
 
 def save_note(category, content):
-    data = {"category": category, "content": content}
+    data = {"category": category, "content": content, "user_id": user.id}
     supabase.table("notes").upsert(data).execute()
 
 def get_progress():
-    result = supabase.table("progress").select("*").execute()
+    result = supabase.table("progress").select("*").eq("user_id", user.id).execute()
     return {item["key"]: item["done"] for item in result.data}
 
 def save_progress(key, done):
-    data = {"key": key, "done": done}
+    data = {"key": key, "done": done, "user_id": user.id}
     supabase.table("progress").upsert(data).execute()
 
 # ===== 網頁排版與字型 =====
