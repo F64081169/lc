@@ -1,2 +1,15 @@
-# prevent from overwriting DB
+# 防止將本地進度資料上傳（你現在改用 Supabase 儲存）
 *.json
+
+# 隱藏 Streamlit 機密設定檔（例如 secrets.toml）
+.streamlit/
+
+# 系統雜項
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VSCode 或開發用設定檔（視情況）
+.vscode/
